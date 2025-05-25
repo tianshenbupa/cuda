@@ -32,3 +32,7 @@ Discord -   / discord
 ⌨️ (9:18:10) Chapter 10 (MNIST Multi-layer Perceptron)
 ⌨️ (11:41:13) Chapter 11 (Next steps?)
 ⌨️ (11:54:38) Outro)
+
+
+cuda-samples 官方cuda示例
+https://github.com/NVIDIA/cuda-samples 
