@@ -89,6 +89,71 @@ int main() {
 }
 
 ```
+
+这段 CUDA C++ 代码实现了一个**基于 GPU 的矩阵乘法（C = A × B）**，并使用 **NVTX 插桩** 对各阶段进行性能标记，便于用 NVIDIA Nsight 系列工具（如 Nsight Systems）进行性能分析。
+
+---
+
+### ✅ **功能总结**
+
+* 实现了将两个 $N \times N$ 的矩阵 A 和 B 相乘，结果存入矩阵 C。
+* 使用 CUDA 并行计算加速矩阵乘法。
+* 使用 **NVTX 插桩标记**内存分配、数据拷贝、内核执行等关键性能阶段。
+
+---
+
+### 🔍 **结构划分**
+
+#### 1. `__global__ void matrixMulKernel(...)`
+
+* 这是 CUDA 核函数，执行矩阵乘法的核心逻辑。
+* 每个线程负责计算结果矩阵 C 的一个元素 $(row, col)$。
+* 通过二维 `threadIdx` 和 `blockIdx` 确定每个线程对应的矩阵位置。
+
+#### 2. `void matrixMul(...)`
+
+* Host 端函数，执行以下操作：
+
+  * **申请设备内存**（`cudaMalloc`）
+  * **拷贝数据 Host → Device**（`cudaMemcpy`）
+  * **配置线程网格并调用 kernel**
+  * **同步并将结果拷贝回主机**（Device → Host）
+  * **释放设备内存**
+* 使用 NVTX `nvtxRangePush/Pop` 对上述每一步进行性能标记。
+
+#### 3. `main()`
+
+* 初始化矩阵 A、B、C（实际初始化过程略去）。
+* 调用 `matrixMul` 函数进行矩阵乘法。
+* 最后释放主机内存。
+
+---
+
+### 🧠 **技术要点**
+
+| 技术           | 说明                                                              |
+| ------------ | --------------------------------------------------------------- |
+| CUDA 核函数     | 并行计算矩阵元素                                                        |
+| CUDA API     | `cudaMalloc`, `cudaMemcpy`, `cudaFree`, `cudaDeviceSynchronize` |
+| NVTX 插桩      | 用于分析工具中可视化阶段划分                                                  |
+| Thread Block | 采用 16x16 的线程块进行二维并行                                             |
+| Grid 维度      | 通过 `(N + BLOCK_SIZE - 1) / BLOCK_SIZE` 计算每个维度需要的 block 数量       |
+
+---
+
+### 🧪 **适用工具**
+
+* `nvcc` 编译 CUDA 代码
+* `nsys profile ./a.out`：查看各阶段性能开销
+* `ncu` 配合 `--section` 参数查看内核指标（如 occupancy、shared memory 使用）
+
+---
+
+### 🧾 小结
+
+这段代码是一个结构清晰、易于分析的 **CUDA 矩阵乘法基准测试程序**，适合用于性能剖析、优化测试和教学目的。通过引入 NVTX 标记，还便于在 Nsight 工具中进行逐阶段的执行分析。
+
+---
 以下是对这段 CUDA 矩阵乘法程序的**结构性分析**，**不包含任何优化建议或改进意见**，仅着重于代码逻辑、模块划分、内存流程及 profiler 集成：
 
 ---
